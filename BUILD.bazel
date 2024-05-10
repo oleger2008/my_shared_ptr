@@ -1,0 +1,22 @@
+load("@rules_cc//cc:defs.bzl", "cc_library", "cc_test")
+
+cc_library(
+    name = "shared_ptr",
+    hdrs = [
+        "include/my_shared_ptr.h"
+    ],
+    includes = ["include"],
+)
+
+
+cc_test(
+    name = "shared_ptr_test",
+    srcs = [
+        "tests/shared_ptr_test.cpp",
+    ],
+    deps = [
+        ":shared_ptr",
+        "@gtest//:gtest_main",
+    ],
+    copts = ["-std=c++17"],
+)
