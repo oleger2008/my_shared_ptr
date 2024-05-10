@@ -7,24 +7,34 @@ template <typename T>
 class SharedPtr {
 public:
     constexpr SharedPtr() noexcept = default;
+
     constexpr SharedPtr(std::nullptr_t) noexcept
-        : data_{nullptr}
-        , count_{nullptr}
+    : data_{nullptr}
+    , count_{nullptr}
     {}
 
-    SharedPtr(T *raw_data) {
-        data_ = raw_data;
-        count_ = new uint64_t{1u};
-    }
+    explicit SharedPtr(T *raw_data) noexcept
+    : data_{raw_data}
+    , count_{new int64_t{raw_data ? 1u : 0u}}
+    {}
 
     ~SharedPtr() {
-        if (count_) {
-            --count_;
-            if (*count_ == 0u) {
-                delete count_;
-                delete data_;
-            }
+        if (!count_)
+            return;
+
+        if (*count_ > 0) {
+            --*count_;
         }
+        
+        if (*count_ == 0u) {
+            if (data_)
+                delete data_;
+            delete count_;
+        }
+    }
+
+    int64_t use_count() const noexcept {
+        return count_ ? *count_ : 0u;
     }
 
     operator bool() const noexcept {
@@ -35,7 +45,7 @@ public:
         return data_;
     }
 
-    T operator*() const noexcept {
+    T& operator*() const noexcept {
         assert(data_ != nullptr);
         return *data_;
     }
@@ -45,6 +55,6 @@ public:
     }
 
 private:
-    uint64_t *count_ = nullptr;
+    int64_t *count_ = nullptr;
     T *data_ = nullptr;
 };
