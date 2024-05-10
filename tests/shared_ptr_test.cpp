@@ -14,5 +14,7 @@ TEST(shared_ptr_suite, ctr_raw_ptr) {
     ASSERT_EQ(*ptr, 69);
 }
 
-TEST(shared_ptr_suite, ctr_var_args) {
+TEST(shared_ptr_suite, ctr_nullptr) {
+    SharedPtr<int> ptr{nullptr};
+    ASSERT_FALSE(ptr);
 }

@@ -7,6 +7,10 @@ template <typename T>
 class SharedPtr {
 public:
     constexpr SharedPtr() noexcept = default;
+    constexpr SharedPtr(std::nullptr_t) noexcept
+        : data_{nullptr}
+        , count_{nullptr}
+    {}
 
     SharedPtr(T *raw_data) {
         data_ = raw_data;
