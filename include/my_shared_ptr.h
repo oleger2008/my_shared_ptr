@@ -13,10 +13,29 @@ public:
     , count_{nullptr}
     {}
 
-    explicit SharedPtr(T *raw_data) noexcept
+    explicit SharedPtr(T *raw_data) noexcept 
     : data_{raw_data}
     , count_{new int64_t{raw_data ? 1u : 0u}}
     {}
+
+    SharedPtr(const SharedPtr& other) {
+        if (!other.count_) {
+            return;
+        }
+        count_ = other.count_;
+        ++*count_;
+        data_ = other.data_;
+    }
+
+    SharedPtr &operator=(const SharedPtr& other) {
+        if (this == &other) {
+            return *this;
+        }
+
+        SharedPtr copy{other};
+        swap(copy);
+        return *this;
+    }
 
     ~SharedPtr() {
         if (!count_)
@@ -52,6 +71,15 @@ public:
 
     T* operator->() const noexcept {
         return data_;
+    }
+
+    void swap(SharedPtr& other) {
+        std::swap(count_, other.count_);
+        std::swap(data_, other.data_);
+    }
+
+    void reset() noexcept {
+        SharedPtr<T>().swap(*this);
     }
 
 private:

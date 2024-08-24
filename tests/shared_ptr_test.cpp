@@ -9,6 +9,13 @@ TEST(shared_ptr_suite, dft_ctr) {
     ASSERT_EQ(ptr.use_count(), 0);
 }
 
+TEST(shared_ptr_suite, reset) {
+    SharedPtr<int> alpha(new int{69});
+    alpha.reset();
+    ASSERT_FALSE(alpha);
+    ASSERT_EQ(alpha.use_count(), 0);
+}
+
 TEST(shared_ptr_suite, ctr_nullptr) {
     SharedPtr<int> ptr{nullptr};
     ASSERT_FALSE(ptr);
@@ -35,4 +42,84 @@ TEST(shared_ptr_suite, ctr_raw_ptr_non_null) {
     ASSERT_TRUE(ptr);
     ASSERT_EQ(*ptr, 69);
     ASSERT_EQ(ptr.use_count(), 1);
+}
+
+TEST(shared_ptr_suite, copy_ctr_not_null) {
+    SharedPtr<int> ptr(new int{69});
+    SharedPtr<int> ptr_copy{ptr};
+
+    ASSERT_EQ(ptr.use_count(), 2);
+    ASSERT_TRUE(ptr_copy);
+    ASSERT_EQ(*ptr_copy, 69);
+}
+
+TEST(shared_ptr_suite, copy_ctr_null) {
+    SharedPtr<int> ptr(nullptr);
+    SharedPtr<int> ptr_copy{ptr};
+
+    ASSERT_EQ(ptr.use_count(), 0);
+    ASSERT_EQ(ptr_copy.use_count(), 0);
+    ASSERT_FALSE(ptr_copy);
+}
+
+TEST(shared_ptr_suite, copy_ctr_scoped_copy) {
+    SharedPtr<int> ptr(new int{69});
+    {
+        SharedPtr<int> ptr_copy{ptr};
+
+        ASSERT_EQ(ptr.use_count(), 2);
+        ASSERT_TRUE(ptr_copy);
+        ASSERT_EQ(*ptr_copy, 69);
+    }
+    ASSERT_EQ(ptr.use_count(), 1);
+}
+
+TEST(shared_ptr_suite, copy_assign) {
+    SharedPtr<int> ptr(new int{69});
+    SharedPtr<int> ptr_copy = ptr;
+
+    ASSERT_EQ(ptr.use_count(), 2);
+    ASSERT_TRUE(ptr_copy);
+    ASSERT_EQ(*ptr_copy, 69);
+}
+
+TEST(shared_ptr_suite, copy_assign_null) {
+    SharedPtr<int> ptr(nullptr);
+    SharedPtr<int> ptr_copy = ptr;
+
+    ASSERT_EQ(ptr.use_count(), 0);
+    ASSERT_EQ(ptr_copy.use_count(), 0);
+    ASSERT_FALSE(ptr_copy);
+}
+
+TEST(shared_ptr_suite, copy_assign_scoped) {
+    SharedPtr<int> ptr(new int{69});
+    {
+        SharedPtr<int> ptr_copy = ptr;
+
+        ASSERT_EQ(ptr.use_count(), 2);
+        ASSERT_TRUE(ptr_copy);
+        ASSERT_EQ(*ptr_copy, 69);
+    }
+    ASSERT_EQ(ptr.use_count(), 1);
+}
+
+TEST(shared_ptr_suite, copy_reassign) {
+    SharedPtr<int> alpha(new int{69});
+    SharedPtr<int> betta(new int{142});
+    {
+        SharedPtr<int> delta(betta);
+        ASSERT_TRUE(delta);
+        ASSERT_EQ(alpha.use_count(), 1);
+        ASSERT_EQ(betta.use_count(), 2);
+        ASSERT_EQ(*delta, 142);
+
+        delta = alpha;
+        ASSERT_TRUE(delta);
+        ASSERT_EQ(alpha.use_count(), 2);
+        ASSERT_EQ(betta.use_count(), 1);
+        ASSERT_EQ(*delta, 69);
+    }
+    ASSERT_EQ(alpha.use_count(), 1);
+    ASSERT_EQ(betta.use_count(), 1);
 }
