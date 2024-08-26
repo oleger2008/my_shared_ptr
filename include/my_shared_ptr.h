@@ -37,6 +37,21 @@ public:
         return *this;
     }
 
+    SharedPtr(SharedPtr&& other) noexcept {
+        if (!other.count_) {
+            return;
+        }
+        swap(other);
+    }
+
+    SharedPtr &operator=(SharedPtr&& other) {
+        if (this == &other) {
+            return *this;
+        }
+        SharedPtr copy{std::move(other)};
+        swap(other);
+    }
+
     ~SharedPtr() {
         if (!count_)
             return;
@@ -73,7 +88,7 @@ public:
         return data_;
     }
 
-    void swap(SharedPtr& other) {
+    void swap(SharedPtr& other) noexcept {
         std::swap(count_, other.count_);
         std::swap(data_, other.data_);
     }

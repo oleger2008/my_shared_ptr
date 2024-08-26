@@ -123,3 +123,5 @@ TEST(shared_ptr_suite, copy_reassign) {
     ASSERT_EQ(alpha.use_count(), 1);
     ASSERT_EQ(betta.use_count(), 1);
 }
+
+//todo move assign and ctr tests
