@@ -124,4 +124,62 @@ TEST(shared_ptr_suite, copy_reassign) {
     ASSERT_EQ(betta.use_count(), 1);
 }
 
-//todo move assign and ctr tests
+TEST(shared_ptr_suite, assign_raw_ptr) {
+    int* raw_ptr = new int{42};
+    SharedPtr<int> alpha(new int{69});
+    alpha = raw_ptr;
+    ASSERT_TRUE(alpha);
+    ASSERT_EQ(alpha.use_count(), 1);
+    ASSERT_EQ(*alpha, 42);
+}
+
+TEST(shared_ptr_suite, move_ctr) {
+    SharedPtr<int> alpha(new int{69});
+    {
+        SharedPtr<int> betta{std::move(alpha)};
+        ASSERT_TRUE(betta);
+        ASSERT_FALSE(alpha);
+        ASSERT_EQ(betta.use_count(), 1);
+        ASSERT_EQ(*betta, 69);
+    }
+    ASSERT_FALSE(alpha);
+}
+
+TEST(shared_ptr_suite, move_assign) {
+    SharedPtr<int> ptr(new int{69});
+    {
+        SharedPtr<int> ptr_copy = std::move(ptr);
+
+        ASSERT_FALSE(ptr);
+        ASSERT_TRUE(ptr_copy);
+        ASSERT_EQ(ptr_copy.use_count(), 1);
+        ASSERT_EQ(*ptr_copy, 69);
+    }
+    ASSERT_FALSE(ptr);
+    ASSERT_EQ(ptr.use_count(), 0);
+}
+
+TEST(shared_ptr_suite, move_reassign) {
+    SharedPtr<int> alpha(new int{69});
+    SharedPtr<int> betta(new int{142});
+    {
+        SharedPtr<int> delta(betta);
+        ASSERT_TRUE(delta);
+        ASSERT_EQ(alpha.use_count(), 1);
+        ASSERT_EQ(betta.use_count(), 2);
+        ASSERT_EQ(*delta, 142);
+
+        delta = std::move(alpha);
+        ASSERT_TRUE(delta);
+        ASSERT_FALSE(alpha);
+        ASSERT_EQ(alpha.use_count(), 0);
+        ASSERT_EQ(betta.use_count(), 1);
+        ASSERT_EQ(*delta, 69);
+    }
+    ASSERT_FALSE(alpha);
+    ASSERT_EQ(alpha.use_count(), 0);
+    ASSERT_EQ(betta.use_count(), 1);
+}
+
+//todo use insted of int - custom struct that will do smth in ctr and dtr
+//todo f.e. print in sstream - then check it. Or just global counter
